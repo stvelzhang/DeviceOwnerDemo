@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="状态">
+
+        <Preference
+            android:key="deviceowner_enabled"
+            android:title="检测是否为Device Owner"></Preference>
+
+        <Preference
+            android:key="check_root"
+            android:title="检查是否root"
+            ></Preference>
+
+        <Preference
+            android:key="enabled_deviceowner_rooted"
+            android:title="激活成为Device Owner（在已root设备上有效）"
+            ></Preference>
+        <Preference
+            android:key="remove_deviceowner"
+            android:title="移除Device Owner"></Preference>
+        <Preference
+            android:key="hide_app"
+            android:title="隐藏应用"></Preference>
+        <Preference
+            android:key="show_app"
+            android:title="恢复隐藏应用"
+            android:summary="只能恢复最近一个被隐藏的应用"></Preference>
+        <Preference
+            android:key="block_uninstall"
+            android:title="阻止卸载"></Preference>
+        <Preference
+            android:key="lock_task"
+            android:title="setTaskLock"></Preference>
+        <Preference
+            android:key="unlock_task"
+            android:title="解除屏幕固定"></Preference>
+        <Preference
+            android:key="set_app_restrictions"
+            android:title="设置应用限制"
+            android:summary="未测试出效果"></Preference>
+        <Preference
+            android:key="add_user_restriction"
+            android:title="设置用户限制"></Preference>
+        <Preference
+            android:key="clear_user_restriction"
+            android:title="移除用户限制"></Preference>
+        <Preference
+            android:key="global_setting"
+            android:title="修改全局设置"
+            android:summary="未测试出效果"></Preference>
+        <Preference
+            android:key="mute_volume"
+            android:title="静音"></Preference>
+        <Preference
+            android:key="permitted_accessibilityservices"
+            android:title="限定可以使用辅助功能的应用"></Preference>
+        <Preference
+            android:key="disabled_permitted_accessibilityservices"
+            android:title="取消辅助功能限定"></Preference>
+        <Preference
+            android:key="permitted_inputmethods"
+            android:title="限定可以使用的输入法"></Preference>
+        <Preference
+            android:key="disabled_permitted_inputmethods"
+            android:title="取消输入法限定"></Preference>
+        <Preference
+            android:key="disabled_keyguard"
+            android:title="取消锁屏"></Preference>
+        <Preference
+            android:key="disabled_screen_capture"
+            android:title="禁止屏幕捕获"></Preference>
+        <Preference
+            android:key="enabled_screen_capture"
+            android:title="开启屏幕捕获"></Preference>
+        <Preference
+            android:key="secure_settings"
+            android:title="安全设置"></Preference>
+        <Preference
+            android:key="enter_kiosk_mode"
+            android:title="进入kiosk mode"></Preference>
+        <Preference
+            android:key="out_kiosk_mode"
+            android:title="退出kiosk_mode"></Preference>
+        <Preference
+            android:key="app_permission"
+            android:title="设置单个应用权限"></Preference>
+        <Preference
+            android:key="global_app_permission"
+            android:title="设置全局应用权限"></Preference>
+        <Preference
+            android:key="disable_statusbar"
+            android:title="禁用status_bar"></Preference>
+    </PreferenceCategory>
+</PreferenceScreen>
