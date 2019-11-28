@@ -61,8 +61,8 @@ public class DeviceOwnerFragment extends PreferenceFragment implements Preferenc
     private static final int ADD_USER_RESTRICTION = 0;
     private static final int CLEAR_USER_RESTRICTION = 1;
 
-    private String[] userRestrictionsDisplays = {"禁止音量调节", "禁止安装应用", "禁止卸载应用"};
-    private String[] userRestrictionsKeys = {UserManager.DISALLOW_ADJUST_VOLUME, UserManager.DISALLOW_INSTALL_APPS, UserManager.DISALLOW_UNINSTALL_APPS};
+    private String[] userRestrictionsDisplays = {"禁止音量调节", "禁止安装应用", "禁止卸载应用","禁止蓝牙","禁止位置分享","禁止配置小区广播","禁止数据网络配置"};
+    private String[] userRestrictionsKeys = {UserManager.DISALLOW_ADJUST_VOLUME, UserManager.DISALLOW_INSTALL_APPS, UserManager.DISALLOW_UNINSTALL_APPS,UserManager.DISALLOW_BLUETOOTH,UserManager.DISALLOW_SHARE_LOCATION,UserManager.DISALLOW_CONFIG_CELL_BROADCASTS,UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS};
 
 
     private String[] globalSettingsDisplays = {"AUTO_TIME,NO", "AUTO_TIME,YES", "AUTO_TIME_ZONE,NO", "AUTO_TIME_ZONE,YES",
@@ -120,6 +120,8 @@ public class DeviceOwnerFragment extends PreferenceFragment implements Preferenc
         findPreference("app_permission").setOnPreferenceClickListener(this);
         findPreference("global_app_permission").setOnPreferenceClickListener(this);
         findPreference("disable_statusbar").setOnPreferenceClickListener(this);
+        findPreference("reboot_device").setOnPreferenceClickListener(this);
+        findPreference("case_test").setOnPreferenceClickListener(this);
 
     }
 
@@ -215,6 +217,16 @@ public class DeviceOwnerFragment extends PreferenceFragment implements Preferenc
             case "disable_statusbar":
                 disableStatusBar();
                 break;
+            case "reboot_device":
+                rebootDevice();
+                break;
+            case "case_test":
+                //getWifiMacAddress(mComponentName);
+                //setSwitchUser();
+                //setDeviceOwnerLockScreenInfo(mComponentName,"you see see you,one day day");
+                //getDeviceOwnerLockScreenInfo();
+                getScreenCaptureDisabled(mComponentName);
+                break;
         }
         return true;
     }
@@ -222,24 +234,26 @@ public class DeviceOwnerFragment extends PreferenceFragment implements Preferenc
     private boolean checkDeviceOwnerEnabled() {
         boolean isProfileOwnerApp = dpm.isProfileOwnerApp(mComponentName.getPackageName());
         Log.d("mylog", "checkDeviceOwnerEnabled----isProfileOwnerApp: " + isProfileOwnerApp);
-
         return dpm.isDeviceOwnerApp(activity.getPackageName());
 
 
     }
 
 
-    private List<String> getPermittedCrossProfileNotificationListeners(ComponentName admin) {
-        List<String> res = null;
 
-
-        res = dpm.getPermittedCrossProfileNotificationListeners(admin);
-
-        return res;
+    private boolean isDeviceOwnerApp(){
+        return dpm.isDeviceOwnerApp(activity.getPackageName());
     }
 
-
-
+    @TargetApi(Build.VERSION_CODES.N)
+    private String getWifiMacAddress(ComponentName admin) {
+        String res = null;
+        if (isDeviceOwnerApp()) {
+            res = dpm.getWifiMacAddress(admin);
+            Log.e("mylog","getWifiMacAddress---res:" + res);
+        }
+        return res;
+    }
 
 
     private void removeDeviceOwner() {
@@ -348,6 +362,7 @@ public class DeviceOwnerFragment extends PreferenceFragment implements Preferenc
         setAppHide(packageName, false);
     }
 
+    //隐藏或者启用应用
     private void setAppHide(String packageName, boolean hide) {
         dpm.setApplicationHidden(mComponentName, packageName, hide);
         boolean isHidden = dpm.isApplicationHidden(mComponentName, packageName);
@@ -452,21 +467,27 @@ public class DeviceOwnerFragment extends PreferenceFragment implements Preferenc
                 Logger.d("value:"+value);
                 switch (which) {
                     case 0:
+                        //测试ok
                         setDeviceGlobalSetting(Settings.Global.AUTO_TIME, value);
                         break;
                     case 1:
+                        //测试ok
                         setDeviceGlobalSetting(Settings.Global.AUTO_TIME, value);
                         break;
                     case 2:
+                        //测试ok
                         setDeviceGlobalSetting(Settings.Global.AUTO_TIME_ZONE, value);
                         break;
                     case 3:
+                        //测试ok
                         setDeviceGlobalSetting(Settings.Global.AUTO_TIME_ZONE, value);
                         break;
                     case 4://ADB关闭，无法看到log信息，无法执行ADB命令
+                        //测试ok
                         setDeviceGlobalSetting(Settings.Global.ADB_ENABLED,value);
                         break;
                     case 5://ADB开启
+                        //测试ok
                         setDeviceGlobalSetting(Settings.Global.ADB_ENABLED,value);
                         break;
                     case 6:
@@ -494,13 +515,24 @@ public class DeviceOwnerFragment extends PreferenceFragment implements Preferenc
     /**
      * 锁定屏幕
      */
+
     private void setLockTask(String packageName) {
         String[] packages = {packageName};
         Log.e("mylog","setLockTask---mComponentName:" + mComponentName
         + "---packages:" + packages);
         dpm.setLockTaskPackages(mComponentName, packages);
-        activity.startLockTask();
+        //activity.startLockTask(); //modify for stvelzhang
     }
+    //设置哪些应用程序能够在锁定界面显示
+    private void setLockTaskPackages(ComponentName admin, String[] packages) {
+        if (packages == null) return;
+
+        if(isDeviceOwnerApp()) {
+            dpm.setLockTaskPackages(admin, packages);
+        }
+    }
+
+
 
     private void unlockTask() {
         Logger.d("isIn:" + am.isInLockTaskMode());
@@ -547,6 +579,9 @@ public class DeviceOwnerFragment extends PreferenceFragment implements Preferenc
 
     /**
      * 输入法限定
+     * 此方法只对第三方输入法有效，系统输入法不会被禁用，被禁用的输入法在设置里呈灰色显示。
+     *
+     * 参数传null可以取消限定。
      */
     private void setPermittedInputMethods(String packageName) {
         Logger.d("输入法：" + packageName);
@@ -556,19 +591,78 @@ public class DeviceOwnerFragment extends PreferenceFragment implements Preferenc
         ToastUtil.show(result?"限定成功":"限定失败");
     }
 
+    private List<String> getPermittedInputMethods(ComponentName admin) {
+        List<String> res = null;
+        if(isDeviceOwnerApp()) {
+            res = dpm.getPermittedInputMethods(admin);
+            Logger.d("限定的输入法：" + res);
+
+        }
+        return res;
+    }
+
+
     private void openInputMethodsSelectForAll() {
+        getPermittedInputMethods(mComponentName);
         dpm.setPermittedInputMethods(mComponentName, null);
     }
 
-//    @TargetApi(Build.VERSION_CODES.N)
-//    private void rebootDevice(){
-//        dpm.reboot(mComponentName);
-//    }
+    @TargetApi(Build.VERSION_CODES.N)
+    private void rebootDevice(){
+        Log.d("mylog", "rebootDevice----here---mComponentName: " + mComponentName);
+        dpm.reboot(mComponentName);
+    }
 
     private void setDeviceAccountManagementDisabled(){
         // TODO: 2016/6/27 未测试
 //        dpm.setAccountManagementDisabled(mComponentName);
     }
+
+
+    @TargetApi(Build.VERSION_CODES.N)
+    private void setDeviceOwnerLockScreenInfo(ComponentName admin, CharSequence info) {
+        if (isDeviceOwnerApp()) {
+            dpm.setDeviceOwnerLockScreenInfo(admin, info);
+        }
+    }
+
+
+//默认情况下，用户可以使用任何输入法。当添加了零个或多个包时，用户无法启用不在列表中的输入法
+    private boolean setPermittedInputMethods(ComponentName admin, List<String> packageNames) {
+        boolean res = false;
+
+        if (isDeviceOwnerApp()) {
+            res = dpm.setPermittedInputMethods(admin, packageNames);
+        }
+        return res;
+    }
+
+
+
+
+    @TargetApi(Build.VERSION_CODES.N)
+    private CharSequence getDeviceOwnerLockScreenInfo() {
+        CharSequence res = null;
+
+        if (isDeviceOwnerApp()) {
+            res = dpm.getDeviceOwnerLockScreenInfo();
+            Log.e("mylog","getDeviceOwnerLockScreenInfo---res:" + res);
+        }
+        return res;
+    }
+
+
+    private boolean getScreenCaptureDisabled(ComponentName admin) {
+        boolean res = false;
+
+        if (isDeviceOwnerApp()) {
+            res = dpm.getScreenCaptureDisabled(admin);
+            Log.e("mylog","getScreenCaptureDisabled---res:" + res);
+        }
+        return res;
+    }
+
+
 
     private String getHomeActivity() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -612,7 +706,7 @@ public class DeviceOwnerFragment extends PreferenceFragment implements Preferenc
             ToastUtil.show("已启用");
         }
     }
-
+    //设置系统设置中安全相关的属性
     private void selectSecureSetting() {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setItems(secureSettingsDisplays, new DialogInterface.OnClickListener() {
@@ -654,7 +748,7 @@ public class DeviceOwnerFragment extends PreferenceFragment implements Preferenc
      * 需要成为系统应用才可以获取user
      */
     private void setSwitchUser() {
-//        dpm.switchUser(mComponentName,);
+        //dpm.switchUser(mComponentName,);
     }
 
     boolean statusbar = true;
@@ -669,6 +763,7 @@ public class DeviceOwnerFragment extends PreferenceFragment implements Preferenc
     /**
      * 全局应用动态权限
      */
+    //允许应用程序自动授予或拒绝运行时权限请求
     @TargetApi(Build.VERSION_CODES.M)
     private void setDevicePermissionPolicy() {
         int before = dpm.getPermissionPolicy(mComponentName);
@@ -679,16 +774,19 @@ public class DeviceOwnerFragment extends PreferenceFragment implements Preferenc
             public void onClick(DialogInterface dialog, int which) {
                 switch (which) {
                     case 0:
+                        //权限策略始终拒绝运行时权限的新权限请求.
                         dpm.setPermissionPolicy(mComponentName,DevicePolicyManager.PERMISSION_POLICY_AUTO_DENY);
                         int after = dpm.getPermissionPolicy(mComponentName);
                         Logger.d("permission policy after0:"+after);
                         break;
                     case 1:
+                        //权限策略始终向运行时权限授予新的权限请求.
                         dpm.setPermissionPolicy(mComponentName,DevicePolicyManager.PERMISSION_POLICY_AUTO_GRANT);
                         int after1 = dpm.getPermissionPolicy(mComponentName);
                         Logger.d("permission policy after1:"+after1);
                         break;
                     case 2:
+                        //权限策略提示用户输入新的运行时权限请求.
                         dpm.setPermissionPolicy(mComponentName,DevicePolicyManager.PERMISSION_POLICY_PROMPT);
                         int after2 = dpm.getPermissionPolicy(mComponentName);
                         Logger.d("permission policy after2:"+after2);
@@ -731,11 +829,13 @@ public class DeviceOwnerFragment extends PreferenceFragment implements Preferenc
         }).create().show();
     }
 
+    //将锁屏模式设置为None，当用户设置了密码时无效
     @TargetApi(Build.VERSION_CODES.M)
     private void setDeviceKeyGuardDisabled() {
         dpm.setKeyguardDisabled(mComponentName,true);
     }
 
+    //设置系统更新策略
     @TargetApi(Build.VERSION_CODES.M)
     private void changeSystemUpdatePollicy(){
         // TODO: 2016/7/6

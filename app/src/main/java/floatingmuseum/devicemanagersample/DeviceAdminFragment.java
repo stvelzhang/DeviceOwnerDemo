@@ -236,7 +236,17 @@ public class DeviceAdminFragment extends PreferenceFragment implements Preferenc
      */
     private void disableKeyguardFeatures() {
         Logger.d("which:"+dpm.getKeyguardDisabledFeatures(mComponentName));
-        dpm.setKeyguardDisabledFeatures(mComponentName,DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL);
+        dpm.setKeyguardDisabledFeatures(mComponentName,DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA);
         Logger.d("which:"+dpm.getKeyguardDisabledFeatures(mComponentName));
     }
+/*
+    KEYGUARD_DISABLE_WIDGETS_ALL
+    KEYGUARD_DISABLE_SECURE_CAMERA
+    KEYGUARD_DISABLE_SECURE_NOTIFICATIONS
+    KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS
+    KEYGUARD_DISABLE_TRUST_AGENTS
+    KEYGUARD_DISABLE_FINGERPRINT
+    KEYGUARD_DISABLE_FEATURES_ALL
+*/
+
 }

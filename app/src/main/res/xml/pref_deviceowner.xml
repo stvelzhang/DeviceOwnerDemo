@@ -90,5 +90,11 @@
         <Preference
             android:key="disable_statusbar"
             android:title="禁用status_bar"></Preference>
+        <Preference
+            android:key="reboot_device"
+            android:title="重启设备"></Preference>
+        <Preference
+            android:key="case_test"
+            android:title="功能操作测试"></Preference>
     </PreferenceCategory>
 </PreferenceScreen>
